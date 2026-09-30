@@ -4,9 +4,13 @@ Team members: Neelesh Maharjan
 
 # Introduction
 
-BookBase is a web-based knowledge-management platform for organizing and retrieving insights from books. Users will be able to browse a centralized library, search by title, author, language, genre, or tag, and open Q&A pairs about each book. Unlike a basic catalog, BookBase is designed around post-reading retention.
+Mid-size dealerships often run sales, purchasing, banking and reporting through separate spreadsheets and paper files, leading to slow month-end closes (3–5 days), unreliable vehicle costing, missed collections, and no timely view of company finances.
 
-The project addresses a common problem. Reading notes are usually scattered across notebooks, documents, and separate apps, which makes it slow to find something previously learned. BookBase will store structured book information in one searchable place, using a React front end, a .NET 8 REST API, and a PostgreSQL database.
+This project proposes a centralized dealership accounting system to solve these problems by bringing sales, inventory, banking and reporting into one integrated platform with a single source of truth.
+
+Key capabilities include: creating and managing sales invoices with automatic total calculations; recording partial/full payments to track customer balances; logging vehicle purchases and automatically marking units as Sold once invoiced — preventing double-selling; linking bank transactions to invoices for faster reconciliation; and providing monthly Profit & Loss reports, per-vehicle profit tracking, and a real-time financial dashboard.
+
+By unifying these workflows, the system will reduce manual reconciliation effort, eliminate costly inventory errors, improve collections, and give management timely, accurate financial visibility.
 
 # Anticipated Technologies
 
@@ -18,32 +22,26 @@ Database: Data will be stored in PostgreSQL. For database access, I will use Dap
 
 # Method/Approach
 
-BookBase will be built in nine steps, starting with the data and moving outward to the user interface.
+AutoPlex Motors Accounting System will be built in nine steps, starting with the data and moving outward to the user interface.
 
-1. Design the database schema: Define a PostgreSQL schema for books, descriptions, quotes, and Q&A pairs, and the relationships between them. Every later layer builds on this foundation.
+1. Design the database schema: Define a schema for vehicles, customers, invoices, payments, vendors and bank transactions, along with the relationships between them (e.g., a vehicle linked to one purchase record and one sales invoice). Every later layer builds on this foundation.
 
-2. Extract book content with Claude: Use Claude to pull a description, notable quotes, and Q&A pairs from a book, then load them into the database to provide real data early.
+2. Load core reference data: Populate the database with initial vehicle inventory, vendor records and customer data to provide real data early and validate that the schema supports actual dealership workflows.
 
-3. Create the .NET project with Onion architecture: Set up a layered .NET 8 solution with domain entities at the center, then the application layer, then infrastructure and API. Dependencies point inward, keeping business logic independent and testable.
-
-4. Connect .NET to PostgreSQL: Implement repositories in the infrastructure layer using Npgsql, behind interfaces defined in the inner layers.
-
-5. Build the APIs: Create REST endpoints for books, quotes, and Q&A pairs, with search, filtering, and validation.
-
-6. Test the back end: Write unit tests for business logic and integration tests against PostgreSQL to verify queries and endpoints.
-
-7. Create the React front end: Set up a React and Vite app with an organized folder structure for components, pages, and services. Add Redux to hold shared state (books, quotes, loading, and errors) and Redux Saga to manage asynchronous API calls, cancellation, and failure handling.
-
-8. Integrate with the API: Connect the interface so users can browse, search, and view books, quotes, and Q&A pairs, with clear loading and error states.
-
-9. Test the front end: Test components, state logic, and key user workflows, and check responsiveness and accessibility.
+3. Create the back-end project with layered architecture: Set up a layered solution with domain entities (vehicle, invoice, payment) at the center, then application logic, then infrastructure and API. Dependencies point inward, keeping accounting rules independent and testable.
+4. Connect the back end to the database: Implement repositories in the infrastructure layer for vehicles, invoices, payments and bank transactions, behind interfaces defined in the inner layers.
+5. Build the core APIs: Create REST endpoints for vehicle purchases, sales invoices, payments and bank reconciliation, including validation (e.g., blocking a Sold vehicle from being invoiced again) and automatic calculations (invoice totals, balances due).
+6. Test the back end: Write unit tests for business rules — invoice total calculations, Sold-status locking, balance updates on partial payment — and integration tests to verify database queries and API endpoints behave correctly.
+7. Create the front end: Set up a web front end with an organized structure for screens covering sales invoicing, inventory, payments and reporting. Use shared state management to hold invoices, vehicle status, and loading/error states across the app.
+8. Integrate with the API: Connect the interface so salespeople can create and manage invoices, accountants can record payments and reconcile bank transactions, and the dealership principal can view the dashboard and Profit & Loss reports — with clear loading and error states throughout.
+9. Validate with accounting staff, then test the front end: Have accountants verify that calculations (balances, invoice totals, gross profit) are correct before the reporting screens are finalized. Then test components, workflows (invoice-to-payment, purchase-to-sale), and check responsiveness and accessibility.
 
 # Estimated Timeline
 
-The project has three major milestones. First, I'll design the database schema and load it with content extracted from a book using Claude, which should take about one week (by 10/7/2026). Second, I'll build the .NET back end, including the database connection, web APIs, and tests, which should take two to three weeks (by 10/28/2026). Third, I'll build the React front end and integrate it with the APIs, which should take another two to three weeks (by 11/15/2026).
+The project has three major milestones. First, I'll design the database schema and load it with core reference data (vehicles, customers, vendors), which should take about two to three weeks (by 10/21/2026). Second, I'll build the back end, including the database connection, core APIs (invoicing, payments, inventory, bank reconciliation) and tests, which should take two to three weeks (by 11/11/2026). Third, I'll build the front end, integrate it with the APIs, and validate calculations with accounting staff, which should take another two weeks (by 11/25/2026).
 
 # Anticipated Problems
 
-1. Copyright issues when extracting book content: Using Claude to extract summaries, quotes, and Q&A pairs from books could run into copyright limits. Claude may decline to reproduce long passages from copyrighted books, and storing large amounts of copyrighted text in the database could create legal problems for the application.
+1. Linking sales and purchase records: A vehicle's purchase record and sales invoice must stay correctly linked so gross profit and Sold status stay accurate. An incorrect link could let a unit be re-invoiced or produce wrong profit figures.
 
-2. Implementing Redux and Redux Saga: Redux and Redux Saga add complexity to the front end. Setting up the store, actions, reducers, and sagas involves a fair amount of boilerplate, and Saga's generator functions and asynchronous flow (such as cancellation and error handling) can be hard to learn and debug.
+2. Bank reconciliation matching: Matching bank transactions to invoices and bills is complex due to partial payments, fees, and timing differences. Faulty matching logic could undermine the reconciliation feature's goal of speeding up month-end close.
