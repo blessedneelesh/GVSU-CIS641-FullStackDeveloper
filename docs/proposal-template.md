@@ -14,9 +14,9 @@ By unifying these workflows, the system will reduce manual reconciliation effort
 
 # Anticipated Technologies
 
-Front end: The user interface will be built with React and Vite. React lets me reuse components like book cards and detail pages, and Vite keeps development fast. Fluent UI will provide accessible, ready-made controls. React Router will handle navigation. Redux will manage shared global application state, and Redux Saga will handle asynchronous tasks and side effects such as API requests. Axios will handle communication with the server.
+Front end: The user interface will be built with React and Vite. React lets me reuse components like invoice forms and vehicle detail views, and Vite keeps development fast. Fluent UI will provide accessible, ready-made controls. React Router will handle navigation. Redux will manage shared global application state, and Redux Saga will handle asynchronous tasks and side effects such as API requests. Axios will handle communication with the server.
 
-Back end: The server will be a .NET 8 REST API that provides books, quotes, and Q&A pairs. It will implement a layered (Onion) architecture that separates domain models and service contracts from infrastructure concerns (persistence and presentation). Its primary responsibilities will be storing and querying book records in PostgreSQL, offering application services for business use cases, and exposing those services through a presentation layer (API).
+Back end: The server will be a .NET 8 REST API that provides sales invoices, vehicle inventory, payments, and reporting data. It will implement a layered (Onion) architecture that separates domain models and service contracts from infrastructure concerns (persistence and presentation). Its primary responsibilities will be storing and querying accounting records in PostgreSQL, offering application services for business use cases (invoicing, payments, reconciliation), and exposing those services through a presentation layer (API).
 
 Database: Data will be stored in PostgreSQL. For database access, I will use Dapper, which works best for hand-tuned SQL.
 
@@ -29,11 +29,17 @@ AutoPlex Motors Accounting System will be built in nine steps, starting with the
 2. Load core reference data: Populate the database with initial vehicle inventory, vendor records and customer data to provide real data early and validate that the schema supports actual dealership workflows.
 
 3. Create the back-end project with layered architecture: Set up a layered solution with domain entities (vehicle, invoice, payment) at the center, then application logic, then infrastructure and API. Dependencies point inward, keeping accounting rules independent and testable.
+
 4. Connect the back end to the database: Implement repositories in the infrastructure layer for vehicles, invoices, payments and bank transactions, behind interfaces defined in the inner layers.
+
 5. Build the core APIs: Create REST endpoints for vehicle purchases, sales invoices, payments and bank reconciliation, including validation (e.g., blocking a Sold vehicle from being invoiced again) and automatic calculations (invoice totals, balances due).
+
 6. Test the back end: Write unit tests for business rules — invoice total calculations, Sold-status locking, balance updates on partial payment — and integration tests to verify database queries and API endpoints behave correctly.
+
 7. Create the front end: Set up a web front end with an organized structure for screens covering sales invoicing, inventory, payments and reporting. Use shared state management to hold invoices, vehicle status, and loading/error states across the app.
+
 8. Integrate with the API: Connect the interface so salespeople can create and manage invoices, accountants can record payments and reconcile bank transactions, and the dealership principal can view the dashboard and Profit & Loss reports — with clear loading and error states throughout.
+
 9. Validate with accounting staff, then test the front end: Have accountants verify that calculations (balances, invoice totals, gross profit) are correct before the reporting screens are finalized. Then test components, workflows (invoice-to-payment, purchase-to-sale), and check responsiveness and accessibility.
 
 # Estimated Timeline
