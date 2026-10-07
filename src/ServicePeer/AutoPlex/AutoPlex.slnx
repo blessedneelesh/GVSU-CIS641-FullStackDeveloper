@@ -1,3 +1,7 @@
 <Solution>
+  <Project Path="AutoPlex.Peer/AutoPlex.Peer.csproj" />
   <Project Path="AutoPlex.PeerApplication/AutoPlex.PeerApplication.csproj" />
+  <Project Path="AutoPlex.Repository/AutoPlex.Repository.csproj" />
+  <Project Path="AutoPlex.Services.Abstraction/AutoPlex.Services.Abstractions.csproj" />
+  <Project Path="AutoPlex.Services/AutoPlex.Services.csproj" />
 </Solution>

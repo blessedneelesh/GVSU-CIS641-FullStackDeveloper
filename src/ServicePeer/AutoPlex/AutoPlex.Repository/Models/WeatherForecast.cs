@@ -1,4 +1,4 @@
-namespace AutoPlex.PeerApplication
+namespace AutoPlex.Repository.Models
 {
     public class WeatherForecast
     {
