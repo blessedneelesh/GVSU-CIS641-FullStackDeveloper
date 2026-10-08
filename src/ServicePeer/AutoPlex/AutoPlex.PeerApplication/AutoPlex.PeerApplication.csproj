@@ -11,4 +11,11 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AutoPlex.Peer\AutoPlex.Peer.csproj" />
+    <ProjectReference Include="..\AutoPlex.Repository\AutoPlex.Repository.csproj" />
+    <ProjectReference Include="..\AutoPlex.Services.Abstraction\AutoPlex.Services.Abstractions.csproj" />
+    <ProjectReference Include="..\AutoPlex.Services\AutoPlex.Services.csproj" />
+  </ItemGroup>
+
 </Project>
