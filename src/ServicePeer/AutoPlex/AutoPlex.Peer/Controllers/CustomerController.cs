@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using AutoPlex.Services.Abstractions.ServiceInterfaces;
-
+using AutoPlex.Repository.RequestFeatures;
 namespace AutoPlex.Peer.Controllers
 {
     [ApiController]
@@ -16,9 +16,9 @@ namespace AutoPlex.Peer.Controllers
             _customerService = customerService;
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllCustomers()
+        public async Task<IActionResult> GetAllCustomers([FromQuery] CustomerParameters customerParameters)
         {
-            var customers = await _customerService.GetAllCustomers();
+            var customers = await _customerService.GetAllCustomers(customerParameters);
             return Ok(customers);
         }
     }

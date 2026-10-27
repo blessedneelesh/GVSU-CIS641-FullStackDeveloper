@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using AutoPlex.Repository.Interface;
 using AutoPlex.Repository.Models.Dto;
+using AutoPlex.Repository.RequestFeatures;
 
 namespace AutoPlex.Services.Service
 {
@@ -16,9 +17,9 @@ namespace AutoPlex.Services.Service
             _customerRepository = customerRepository;
         }
 
-        public Task<List<CustomerResponseDto>> GetAllCustomers()
+        public Task<PagedList<CustomerResponseDto>> GetAllCustomers(CustomerParameters customerParameters)
         {
-            return _customerRepository.GetAllCustomers();
+            return _customerRepository.GetAllCustomers(customerParameters);
         }
     }
 }
