@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoPlex.Repository.Models.Dto;
+using AutoPlex.Repository.RequestFeatures;
+using AutoPlex.Services.Abstractions.ServiceInterfaces;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using AutoPlex.Services.Abstractions.ServiceInterfaces;
-using AutoPlex.Repository.RequestFeatures;
 namespace AutoPlex.Peer.Controllers
 {
     [ApiController]
@@ -19,7 +20,7 @@ namespace AutoPlex.Peer.Controllers
         public async Task<IActionResult> GetAllCustomers([FromQuery] CustomerParameters customerParameters)
         {
             var customers = await _customerService.GetAllCustomers(customerParameters);
-            return Ok(customers);
+            return Ok(new { items = customers, metaData = customers.MetaData });
         }
     }
 }

@@ -48,16 +48,22 @@ namespace AutoPlex.Repository.Repositories
                 queryParams.Add("SearchTerm", $"%{searchTerm.ToLowerInvariant()}%");
             }
 
-            var sql = "SELECT * FROM customer";
-            if (whereClauses.Count > 0)
-            {
-                sql += " WHERE " + string.Join(" AND ", whereClauses);
-            }
+            var whereSql = whereClauses.Count > 0
+                ? " WHERE " + string.Join(" AND ", whereClauses)
+                : string.Empty;
 
-            var customers = (await connection.QueryAsync<CustomerResponseDto>(sql, queryParams)).ToList();
+            var count = await connection.ExecuteScalarAsync<int>($"SELECT COUNT(*) FROM customer{whereSql}", queryParams);
 
-            return PagedList<CustomerResponseDto>.ToPagedList(
+            queryParams.Add("Offset", (customerParameters.PageNumber - 1) * customerParameters.PageSize);
+            queryParams.Add("Limit", customerParameters.PageSize);
+
+            var customers = (await connection.QueryAsync<CustomerResponseDto>(
+                $"SELECT * FROM customer{whereSql} OFFSET @Offset LIMIT @Limit",
+                queryParams)).ToList();
+
+            return new PagedList<CustomerResponseDto>(
                 customers,
+                count,
                 customerParameters.PageNumber,
                 customerParameters.PageSize);
         }
