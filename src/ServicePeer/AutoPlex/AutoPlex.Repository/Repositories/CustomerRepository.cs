@@ -24,11 +24,42 @@ namespace AutoPlex.Repository.Repositories
         {
             using IDbConnection connection = _repositoryContext.GetDatabaseConnection();
 
-            // Load all customers and let PagedList perform paging in memory.
-            string sql = @"SELECT * FROM customer";
-            var customers = (await connection.QueryAsync<CustomerResponseDto>(sql)).ToList();
+            var whereClauses = new List<string>();
+            var queryParams = new DynamicParameters();
 
-            return PagedList<CustomerResponseDto>.ToPagedList(customers, customerParameters.PageNumber, customerParameters.PageSize);
+            var status = customerParameters.Status?.Trim();
+            if (!string.IsNullOrWhiteSpace(status) &&
+                (status.Equals("active", StringComparison.OrdinalIgnoreCase) ||
+                 status.Equals("inactive", StringComparison.OrdinalIgnoreCase)))
+            {
+                whereClauses.Add("LOWER(status) = @Status");
+                queryParams.Add("Status", status.ToLowerInvariant());
+            }
+
+            var searchTerm = customerParameters.SearchTerm?.Trim();
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                whereClauses.Add(@"(
+                    LOWER(first_name) LIKE @SearchTerm OR
+                    LOWER(last_name) LIKE @SearchTerm OR
+                    LOWER(email) LIKE @SearchTerm OR
+                    LOWER(phone) LIKE @SearchTerm
+                )");
+                queryParams.Add("SearchTerm", $"%{searchTerm.ToLowerInvariant()}%");
+            }
+
+            var sql = "SELECT * FROM customer";
+            if (whereClauses.Count > 0)
+            {
+                sql += " WHERE " + string.Join(" AND ", whereClauses);
+            }
+
+            var customers = (await connection.QueryAsync<CustomerResponseDto>(sql, queryParams)).ToList();
+
+            return PagedList<CustomerResponseDto>.ToPagedList(
+                customers,
+                customerParameters.PageNumber,
+                customerParameters.PageSize);
         }
     }
 }
