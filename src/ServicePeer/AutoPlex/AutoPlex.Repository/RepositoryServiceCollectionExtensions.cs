@@ -14,6 +14,16 @@ namespace AutoPlex.Repository
         {
             services.AddScoped<IRepositoryContext, RepositoryContext>();
             services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+            services.AddScoped<IVendorRepository, VendorRepository>();
+            services.AddScoped<IBankAccountRepository, BankAccountRepository>();
+            services.AddScoped<IVehicleRepository, VehicleRepository>();
+            services.AddScoped<IPartRepository, PartRepository>();
+            services.AddScoped<ISalesInvoiceRepository, SalesInvoiceRepository>();
+            services.AddScoped<IArInvoiceRepository, ArInvoiceRepository>();
+            services.AddScoped<IBankReceiptRepository, BankReceiptRepository>();
+            services.AddScoped<ITransactionRepository, TransactionRepository>();
+            services.AddScoped<IBankStatementLineRepository, BankStatementLineRepository>();
 
             return services;
         }

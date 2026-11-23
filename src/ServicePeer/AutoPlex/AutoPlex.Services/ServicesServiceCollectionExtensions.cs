@@ -12,6 +12,19 @@ namespace AutoPlex.Services
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
             services.AddScoped<ICustomerService, CustomerService>();
+            services.AddScoped<IEmployeeService, EmployeeService>();
+            services.AddScoped<IVendorService, VendorService>();
+            services.AddScoped<IBankAccountService, BankAccountService>();
+            services.AddScoped<IVehicleService, VehicleService>();
+            services.AddScoped<IPartService, PartService>();
+            services.AddScoped<ISalesInvoiceService, SalesInvoiceService>();
+            services.AddScoped<ITransactionService, TransactionService>();
+            services.AddScoped<ITransactionPostingService, TransactionPostingService>();
+            services.AddScoped<ITransferService, TransferService>();
+            services.AddScoped<IStatementLineService, StatementLineService>();
+            services.AddScoped<IReceiptService, ReceiptService>();
+            services.AddScoped<IArService, ArService>();
+            services.AddScoped<ICustomerBalanceService, CustomerBalanceService>();
 
             return services;
         }

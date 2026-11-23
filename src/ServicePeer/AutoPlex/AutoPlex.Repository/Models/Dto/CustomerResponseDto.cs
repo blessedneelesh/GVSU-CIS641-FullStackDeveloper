@@ -1,12 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using AutoPlex.Repository.Models.Enums;
 
 namespace AutoPlex.Repository.Models.Dto
 {
     public class CustomerResponseDto
     {
-        public string Id { get; set; }
+        public long Id { get; set; }
         public string First_Name { get; set; }
         public string Last_Name { get; set; }
         public string Phone { get; set; }
@@ -17,7 +18,7 @@ namespace AutoPlex.Repository.Models.Dto
         public string Zip { get; set; }
         public decimal Balance { get; set; }
         public decimal TotalPurchases { get; set; }
-        public string Status { get; set; }
+        public Status Status { get; set; }
 
     }
 }

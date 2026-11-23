@@ -1,0 +1,74 @@
+using AutoPlex.Services.Abstractions.ServiceInterfaces;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using AutoPlex.Repository.Interface;
+using AutoPlex.Repository.Models.Dto;
+using AutoPlex.Repository.Models.Enums;
+using AutoPlex.Repository.RequestFeatures;
+
+namespace AutoPlex.Services.Service
+{
+    public class VendorService : IVendorService
+    {
+        private readonly IVendorRepository _vendorRepository;
+
+        public VendorService(IVendorRepository vendorRepository)
+        {
+            _vendorRepository = vendorRepository;
+        }
+
+        public Task<PagedList<VendorResponseDto>> GetAllVendors(VendorParameters vendorParameters)
+        {
+            return _vendorRepository.GetAllVendors(vendorParameters);
+        }
+
+        public Task<VendorResponseDto?> GetVendorById(long id)
+        {
+            return _vendorRepository.GetVendorById(id);
+        }
+
+        public Task<IEnumerable<VendorResponseDto>> GetActiveVendors(VendorType? type = null)
+        {
+            return _vendorRepository.GetActiveVendors(type);
+        }
+
+        public Task<VendorResponseDto> AddVendor(VendorCreateDto vendor)
+        {
+            ValidateType(vendor.Type);
+            Validate(vendor.Name);
+            return _vendorRepository.AddVendor(vendor);
+        }
+
+        public Task<VendorResponseDto?> UpdateVendor(long id, VendorUpdateDto vendor)
+        {
+            ValidateType(vendor.Type);
+            Validate(vendor.Name);
+            return _vendorRepository.UpdateVendor(id, vendor);
+        }
+
+        public async Task<DeleteVendorResult> DeleteVendor(long id)
+        {
+            if (await _vendorRepository.IsVendorReferenced(id))
+            {
+                return DeleteVendorResult.Referenced;
+            }
+
+            return await _vendorRepository.DeleteVendor(id)
+                ? DeleteVendorResult.Deleted
+                : DeleteVendorResult.NotFound;
+        }
+
+        private static void Validate(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Vendor name is required.");
+        }
+
+        private static void ValidateType(VendorType type)
+        {
+            if (!Enum.IsDefined(type))
+                throw new ArgumentException("Type must be 'Vehicle', 'Parts' or 'Service'.");
+        }
+    }
+}
