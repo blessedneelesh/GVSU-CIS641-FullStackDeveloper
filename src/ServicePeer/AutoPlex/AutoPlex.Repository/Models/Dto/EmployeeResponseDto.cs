@@ -1,0 +1,21 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+using AutoPlex.Repository.Models.Enums;
+
+namespace AutoPlex.Repository.Models.Dto
+{
+    public class EmployeeResponseDto
+    {
+        public long Id { get; set; }
+        public string? First_Name { get; set; }
+        public string? Last_Name { get; set; }
+        public string? Department { get; set; }
+        public string? Job { get; set; }
+        public decimal? Salary { get; set; }
+        public decimal? Bonus { get; set; }
+        public decimal? Commission_Rate { get; set; }
+        public Status? Status { get; set; }
+        public bool Is_Salesperson { get; set; }
+    }
+}

@@ -1,0 +1,25 @@
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Text;
+using AutoPlex.Repository.Models;
+using AutoPlex.Repository.Models.Dto;
+using AutoPlex.Repository.RequestFeatures;
+
+namespace AutoPlex.Repository.Interface
+{
+    public interface ISalesInvoiceRepository
+    {
+        Task<SalesInvoiceResponseDto> AddSalesInvoice(SalesInvoiceCreateDto invoice);
+        Task<SalesInvoiceResponseDto> AddSalesInvoice(SalesInvoiceCreateDto invoice, IDbTransaction tx);
+        Task<SalesInvoiceResponseDto?> UpdateDraftInvoice(long id, SalesInvoiceCreateDto invoice);
+        Task<SalesInvoiceResponseDto> PostSalesInvoice(SalesInvoiceCreateDto invoice);
+        Task<PagedList<SalesInvoiceResponseDto>> GetAllSalesInvoices(SalesInvoiceParameters parameters);
+        Task<SalesInvoiceResponseDto?> GetSalesInvoiceById(long id);
+        Task<SalesInvoiceResponseDto> CancelSalesInvoice(long id, SalesInvoiceCancelDto reason, IDbTransaction tx);
+        Task<SalesInvoice?> GetInvoiceById(long id);
+        Task<SalesInvoice?> GetInvoiceById(long id, IDbTransaction tx);
+        Task<int> UpdatePostedInvoice(SalesInvoice invoice, IDbTransaction tx);
+        Task<int> UpdateInvoicePayment(SalesInvoice invoice, IDbTransaction tx);
+    }
+}

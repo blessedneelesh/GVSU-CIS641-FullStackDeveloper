@@ -1,12 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using AutoPlex.Repository.Models.Enums;
 
 namespace AutoPlex.Repository.Models
 {
     public class Customer
     {
-        public string Id { get; set; }
+        public long Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Phone { get; set; }
@@ -17,6 +18,6 @@ namespace AutoPlex.Repository.Models
         public string Zip { get; set; }
         public decimal Balance { get; set; }
         public decimal TotalPurchases { get; set; }
-        public string Status { get; set; }
+        public Status Status { get; set; }
     }
 }

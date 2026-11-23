@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using AutoPlex.Repository.Models.Enums;
 
 namespace AutoPlex.Repository.RequestFeatures
 {
     public class CustomerParameters: RequestParameters
     {
-        public string? Status { get; set; }
+        public Status? Status { get; set; }
         public string? SearchTerm { get; set; }
     }
 }
