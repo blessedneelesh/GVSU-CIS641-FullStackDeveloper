@@ -1,0 +1,124 @@
+import { EMPLOYEE_ENDPOINTS, SALES_INVOICE_ENDPOINTS } from '../api/apiConstants'
+import { customerClient } from '../api/customerClient'
+import { bankAccountsApi } from '../bankAccounts/bankAccounts.api'
+import { customersApi } from '../customers/customers.api'
+import { employeesApi } from '../employees/employees.api'
+import { mapEmployeeCollection } from '../employees/employees.mappers'
+import { vehiclesApi } from '../vehicles/vehicles.api'
+import type {
+  SalesInvoice,
+  SalesInvoiceCancelRequest,
+  SalesInvoiceDraftRequest,
+  SalesInvoiceFormValues,
+  SalesInvoiceOptions,
+  SalesInvoicePage,
+  SalesInvoiceQuery,
+} from '../../types/salesInvoices'
+import type { Vehicle } from '../../types/vehicles'
+import {
+  mapSalesInvoice,
+  mapSalesInvoiceCollection,
+  readHasNext,
+  toPostInvoiceDto,
+  toSalesInvoiceCancelDto,
+  toSalesInvoiceCreateAndPostDto,
+  toSalesInvoiceRequestDto,
+} from './salesInvoices.mappers'
+
+interface SalesInvoiceQueryParams {
+  PageNumber: number
+  PageSize: number
+  Lifecycle?: string
+  Status?: string
+  FromDate?: string
+  ToDate?: string
+  SearchTerm?: string
+}
+
+// Enough for every customer, employee or vehicle in one request; the GetAll endpoints have no unpaged mode
+const OPTIONS_PAGE_SIZE = 100
+
+async function getSalesInvoices(query: SalesInvoiceQuery, signal?: AbortSignal): Promise<SalesInvoicePage> {
+  const params: SalesInvoiceQueryParams = { PageNumber: query.pageNumber, PageSize: query.pageSize }
+  if (query.status === 'draft' || query.status === 'posted' || query.status === 'cancelled') {
+    params.Lifecycle = query.status
+  } else if (query.status !== 'all') {
+    // Payment statuses only mean something on posted invoices; a cancelled invoice is still "unpaid" on the API
+    params.Lifecycle = 'posted'
+    params.Status = query.status
+  }
+  if (query.fromDate) params.FromDate = query.fromDate
+  if (query.toDate) params.ToDate = query.toDate
+  const searchTerm = query.searchTerm.trim()
+  if (searchTerm) params.SearchTerm = searchTerm
+
+  const { data } = await customerClient.get<unknown>(SALES_INVOICE_ENDPOINTS.getAllSalesInvoices, { params, signal })
+  const items = mapSalesInvoiceCollection(data)
+  // Without metadata, a full page means there may be another one
+  return { items, hasNext: readHasNext(data) ?? items.length === query.pageSize }
+}
+
+async function getSalesInvoiceById(id: string, signal?: AbortSignal): Promise<SalesInvoice> {
+  const { data } = await customerClient.get<unknown>(SALES_INVOICE_ENDPOINTS.getSalesInvoiceById, { params: { id }, signal })
+  return mapSalesInvoice(data)
+}
+
+// The list is refetched afterwards, so the response body isn't needed
+async function addSalesInvoice(values: SalesInvoiceFormValues, signal?: AbortSignal): Promise<void> {
+  await customerClient.post(SALES_INVOICE_ENDPOINTS.addSalesInvoice, toSalesInvoiceRequestDto(values), { signal })
+}
+
+// Adds and posts in one transaction, so a rejected payment leaves no stray draft behind
+async function createAndPostSalesInvoice(values: SalesInvoiceFormValues, signal?: AbortSignal): Promise<void> {
+  await customerClient.post(SALES_INVOICE_ENDPOINTS.createAndPost, toSalesInvoiceCreateAndPostDto(values), { signal })
+}
+
+async function updateDraft({ id, values }: SalesInvoiceDraftRequest, signal?: AbortSignal): Promise<void> {
+  await customerClient.put(SALES_INVOICE_ENDPOINTS.updateDraft, toSalesInvoiceRequestDto(values), { params: { id }, signal })
+}
+
+// "Post Invoice" on an existing draft: save the edits first, since PostInvoice posts the stored invoice and only takes
+// the payment. If posting is rejected, the edits are kept on the draft.
+async function postDraft(request: SalesInvoiceDraftRequest, signal?: AbortSignal): Promise<void> {
+  await updateDraft(request, signal)
+  await customerClient.post(SALES_INVOICE_ENDPOINTS.postInvoice, toPostInvoiceDto(request.values), { params: { id: request.id }, signal })
+}
+
+async function cancelSalesInvoice({ id, reason }: SalesInvoiceCancelRequest, signal?: AbortSignal): Promise<void> {
+  await customerClient.post(SALES_INVOICE_ENDPOINTS.cancelSalesInvoice, toSalesInvoiceCancelDto(reason), { params: { id }, signal })
+}
+
+// Invoices only carry ids for the salesperson, so names come from every employee (a salesperson may since have
+// left); the form picks from the active salespeople, the vehicles still available for sale and the active bank
+// accounts a payment can be deposited to (the API rejects an inactive one)
+async function getOptions(signal?: AbortSignal): Promise<SalesInvoiceOptions> {
+  const [customerPage, employeePage, salespeopleResponse, vehiclePage, bankAccountPage] = await Promise.all([
+    customersApi.getCustomers({ pageNumber: 1, pageSize: OPTIONS_PAGE_SIZE, status: 'all', searchTerm: '' }, signal),
+    employeesApi.getEmployees({ pageNumber: 1, pageSize: OPTIONS_PAGE_SIZE, department: 'all', status: 'all', searchTerm: '' }, signal),
+    customerClient.get<unknown>(EMPLOYEE_ENDPOINTS.getActiveSalespeople, { signal }),
+    vehiclesApi.getVehicles({ pageNumber: 1, pageSize: OPTIONS_PAGE_SIZE, status: 'available', searchTerm: '' }, signal),
+    bankAccountsApi.getBankAccounts({ pageNumber: 1, pageSize: OPTIONS_PAGE_SIZE, bankId: 'all', searchTerm: '' }, signal),
+  ])
+  return {
+    customers: customerPage.items,
+    employees: employeePage.items,
+    salespeople: mapEmployeeCollection(salespeopleResponse.data),
+    vehicles: vehiclePage.items,
+    bankAccounts: bankAccountPage.items.filter((account) => account.status === 'Active'),
+  }
+}
+
+// The detail view's Vehicle block and Vehicle Details tab; an invoice only carries the make, model and VIN
+const getVehicle = (id: string, signal?: AbortSignal): Promise<Vehicle> => vehiclesApi.getVehicleById(id, signal)
+
+export const salesInvoicesApi = {
+  getSalesInvoices,
+  getSalesInvoiceById,
+  getVehicle,
+  addSalesInvoice,
+  createAndPostSalesInvoice,
+  updateDraft,
+  postDraft,
+  cancelSalesInvoice,
+  getOptions,
+}
